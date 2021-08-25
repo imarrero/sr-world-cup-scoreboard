@@ -10,11 +10,12 @@ namespace WorldCupGamesScoreBoardTests
         private IScoreBoardManager manager;
 
         [SetUp]
-        [Order(1)]
         public void Setup()
         {
             manager = new ScoreBoardManagerSR();
         }
+
+        #region StartGames
 
         [Test]
         public void StartFiveGames()
@@ -31,7 +32,41 @@ namespace WorldCupGamesScoreBoardTests
         }
 
         [Test]
-        [Order(2)]
+        public void UNSUCCESS_StartGames_DuplicatedMatch()
+        {
+            manager.StartGame("Germany", "France");
+            Assert.Throws<ArgumentException>(() => manager.StartGame("Germany", "France"));
+        }
+
+        [Test]
+        public void UNSUCCESS_StartGames_EmptyHomeTeam()
+        {
+            Assert.Throws<ArgumentException>(() => manager.StartGame("", "Brazil"));
+        }
+
+        [Test]
+        public void UNSUCCESS_StartGames_EmptyAwayTeam()
+        {
+            Assert.Throws<ArgumentException>(() => manager.StartGame("Spain", ""));
+        }
+
+        [Test]
+        public void UNSUCCESS_StartGames_NullHomeTeam()
+        {
+            Assert.Throws<ArgumentException>(() => manager.StartGame(null, "Brazil"));
+        }
+
+        [Test]
+        public void UNSUCCESS_StartGames_nullAwayTeam()
+        {
+            Assert.Throws<ArgumentException>(() => manager.StartGame("Spain", null));
+        }
+
+        #endregion
+
+        #region FinishGame
+
+        [Test]
         public void FinishFiveGames()
         {
             manager.StartGame("Mexico", "Canada");
@@ -40,13 +75,35 @@ namespace WorldCupGamesScoreBoardTests
             manager.StartGame("Uruguay", "Italy");
             manager.StartGame("Argentina", "Australia");
 
-            Assert.IsTrue(manager.FinishGame("Mexico-Canada"));
             Assert.IsTrue(manager.FinishGame("Spain-Brazil"));
-            Assert.IsTrue(manager.FinishGame("Germany-France"));
             Assert.IsTrue(manager.FinishGame("Mexico-Canada"));
             Assert.IsTrue(manager.FinishGame("Uruguay-Italy"));
+            Assert.IsTrue(manager.FinishGame("Germany-France"));
             Assert.IsTrue(manager.FinishGame("Argentina-Australia"));
 
+            var games = manager.GetSummary();
+
+            Assert.IsTrue(games.Count == 0);
         }
+
+        [Test]
+        public void UNSUCCESS_FinishGames_NotExistsMatchName()
+        {
+            Assert.Throws<ArgumentException>(() => manager.FinishGame("Spain-DUMMY"));
+        }
+
+        [Test]
+        public void UNSUCCESS_FinishGames_EmptyMatchName()
+        {
+            Assert.Throws<ArgumentException>(() => manager.FinishGame(""));
+        }
+
+        [Test]
+        public void UNSUCCESS_FinishGames_NullMatchName()
+        {
+            Assert.Throws<ArgumentException>(() => manager.FinishGame(null));
+        }
+
+        #endregion
     }
 }
