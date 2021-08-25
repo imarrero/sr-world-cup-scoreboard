@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using WorldCupGamesScoreBoard.Models;
 
 namespace WorldCupGamesScoreBoard.Providers
@@ -15,8 +16,23 @@ namespace WorldCupGamesScoreBoard.Providers
 
         public Game StartGame(string HomeTeamName, string AwayTeamName)
         {
-            return new Game();
+            var matchName = $"{HomeTeamName.Trim()}-{AwayTeamName.Trim()}".ToUpper();
+
+            RunStartGameValidations(HomeTeamName, AwayTeamName, matchName);
+
+            var game = new Game()
+            {
+                Id = new Guid(),
+                MatchName = matchName,
+                Scoring = "0-0",
+                StartDate = DateTime.Now.ToUniversalTime()
+            };
+
+            _currentGames.Add(matchName, game);
+
+            return game;
         }
+
 
         public bool FinishGame(string MatchName)
         {
@@ -33,9 +49,26 @@ namespace WorldCupGamesScoreBoard.Providers
             return new Game();
         }
 
-        public Game GetSummary(string HomeTeamName, string AwayTeamName)
+        public List<Game> GetSummary()
         {
-            return new Game();
+            return _currentGames.Values.ToList();
         }
+
+        #region region private functions
+
+        private void RunStartGameValidations(string HomeTeamName, string AwayTeamName, string matchName)
+        {
+            // TODO TECH DEBT: Move this to FluentValidation Library or similar centralized validations
+            if (_currentGames.ContainsKey(matchName))
+                throw new ArgumentException("Requested Game is already on going: Cannot be recreeated");
+
+            if (string.IsNullOrWhiteSpace(HomeTeamName))
+                throw new ArgumentException("Requested HomeTeamName is not valid name");
+
+            if (string.IsNullOrWhiteSpace(AwayTeamName))
+                throw new ArgumentException("Requested HomeTeamName is not valid name");
+        }
+
+        #endregion
     }
 }
