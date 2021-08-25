@@ -64,7 +64,7 @@ namespace WorldCupGamesScoreBoardTests
 
         #endregion
 
-        #region FinishGame
+        #region FinishGames
 
         [Test]
         public void FinishFiveGames()
@@ -105,5 +105,71 @@ namespace WorldCupGamesScoreBoardTests
         }
 
         #endregion
+
+        #region UpdateGames
+
+        [Test]
+        public void UpdateGame_Overload1()
+        {
+            manager.StartGame("Mexico", "Canada");
+            manager.UpdateGame("Mexico-Canada", "3-1");
+
+            var games = manager.GetSummary();
+            Assert.IsTrue(games.Count == 1);
+            Assert.IsTrue(games[0].Scoring == "3-1");
+        }
+
+        [Test]
+        public void UpdateGame_Overload2()
+        {
+            manager.StartGame("Mexico", "Canada");
+            manager.UpdateGame("Mexico-Canada", 4, 6);
+
+            var games = manager.GetSummary();
+            Assert.IsTrue(games.Count == 1);
+            Assert.IsTrue(games[0].Scoring == "4-6");
+        }
+
+        [Test]
+        public void UNSUCCESS_UpdateGame_EmptyScoringV1()
+        {
+            manager.StartGame("Mexico", "Canada");
+            Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-Canada", ""));
+        }
+
+        [Test]
+        public void UNSUCCESS_UpdateGame_IncorrectScoringValuesV1()
+        {
+            manager.StartGame("Mexico", "Canada");
+            Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-Canada", "dummy"));
+            Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-Canada", "dummy-bad"));
+            Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-Canada", "-bad"));
+            Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-Canada", "-b-ad-"));
+        }
+
+        [Test]
+        public void UNSUCCESS_UpdateGame_NotExistsMatchNameV1()
+        {
+            manager.StartGame("Mexico", "Canada");
+            Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-CanadaXXX", "0-9"));
+        }
+
+        [Test]
+        public void UNSUCCESS_UpdateGame_IncorrectScoringValuesV2()
+        {
+            manager.StartGame("Mexico", "Canada");
+            Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-Canada", -1, -6));
+            Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-Canada", -1, 10));
+            Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-Canada", 10, -10));
+        }
+
+        [Test]
+        public void UNSUCCESS_UpdateGame_NotExistsMatchNameV2()
+        {
+            manager.StartGame("Mexico", "Canada");
+            Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-CanadaXXX", 0, 9));
+        }
+
+        #endregion 
     }
 }

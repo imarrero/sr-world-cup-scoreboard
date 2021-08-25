@@ -16,19 +16,19 @@ namespace WorldCupGamesScoreBoard.Providers
 
         public Game StartGame(string HomeTeamName, string AwayTeamName)
         {
-            var matchName = $"{HomeTeamName?.Trim()}-{AwayTeamName?.Trim()}".ToUpper();
+            var parsedMatchName = $"{HomeTeamName?.Trim()}-{AwayTeamName?.Trim()}".ToUpper();
 
-            RunStartGameValidations(HomeTeamName, AwayTeamName, matchName);
+            RunStartGameValidations(HomeTeamName, AwayTeamName, parsedMatchName);
 
             var game = new Game()
             {
                 Id = new Guid(),
-                MatchName = matchName,
+                MatchName = parsedMatchName,
                 Scoring = "0-0",
                 StartDate = DateTime.Now.ToUniversalTime()
             };
 
-            _currentGames.Add(matchName, game);
+            _currentGames.Add(parsedMatchName, game);
 
             return game;
         }
@@ -36,20 +36,31 @@ namespace WorldCupGamesScoreBoard.Providers
 
         public bool FinishGame(string MatchName)
         {
-            var matchName = MatchName?.ToUpper();
+            var parsedMatchName = MatchName?.ToUpper();
 
-            RunFinishGameValidations(matchName);
+            RunFinishGameValidations(parsedMatchName);
 
-            return _currentGames.Remove(matchName);
+            return _currentGames.Remove(parsedMatchName);
         }
 
         public Game UpdateGame(string MatchName, string PairScore)
         {
-            return new Game();
+            (int HomeScore, int AwayScore) scoring;
+            scoring = ParseScoring(PairScore);
+
+            var parsedMatchName = MatchName?.ToUpper();
+
+            return UpdateGame(parsedMatchName, scoring.HomeScore, scoring.AwayScore);
         }
 
         public Game UpdateGame(string MatchName, int HomeScore, int AwayScore)
         {
+            var parsedMatchName = MatchName?.ToUpper();
+
+            RunUpdateGameValidations(parsedMatchName, HomeScore, AwayScore);
+
+            _currentGames[parsedMatchName].Scoring = $"{HomeScore}-{AwayScore}";
+
             return new Game();
         }
 
@@ -60,13 +71,39 @@ namespace WorldCupGamesScoreBoard.Providers
 
         #region region private functions
 
-        private void RunStartGameValidations(string HomeTeamName, string AwayTeamName, string matchName)
+        private (int HomeScore, int AwayScore) ParseScoring(string pairScore)
+        {
+            try
+            {
+                return (Convert.ToInt32(pairScore.Split('-')[0]), Convert.ToInt32(pairScore.Split('-')[1]));
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException("ERROR CODE: XXX - requested PairScore has not the correct format '{number}-{number}'");
+            }
+
+        }
+
+        private void RunUpdateGameValidations(string matchName, int homeScore, int awayScore)
         {
             // TODO TECH DEBT: Move this to FluentValidation Library or similar centralized validations
-            if (string.IsNullOrWhiteSpace(HomeTeamName))
+            if (string.IsNullOrWhiteSpace(matchName))
+                throw new ArgumentException("ERROR CODE: XXX - Requested MatchName is not valid name");
+
+            if (homeScore < 0 || awayScore < 0)
+                throw new ArgumentException("ERROR CODE: XXX - Negative Scores are not allowed");
+
+            if (!_currentGames.ContainsKey(matchName))
+                throw new ArgumentException("ERROR CODE: XXX - Requested Game was not found in current ongoing matches: Cannot be Finished");
+        }
+
+        private void RunStartGameValidations(string homeTeamName, string awayTeamName, string matchName)
+        {
+            // TODO TECH DEBT: Move this to FluentValidation Library or similar centralized validations
+            if (string.IsNullOrWhiteSpace(homeTeamName))
                 throw new ArgumentException("ERROR CODE: XXX - Requested HomeTeamName is not valid name");
 
-            if (string.IsNullOrWhiteSpace(AwayTeamName))
+            if (string.IsNullOrWhiteSpace(awayTeamName))
                 throw new ArgumentException("ERROR CODE: XXX - Requested HomeTeamName is not valid name");
 
             if (_currentGames.ContainsKey(matchName))
