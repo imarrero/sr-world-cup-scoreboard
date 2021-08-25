@@ -27,7 +27,6 @@ namespace WorldCupGamesScoreBoardTests
             manager.StartGame("Argentina", "Australia");
 
             var games = manager.GetSummary();
-
             Assert.IsTrue(games.Count == 5);
         }
 
@@ -116,7 +115,8 @@ namespace WorldCupGamesScoreBoardTests
 
             var games = manager.GetSummary();
             Assert.IsTrue(games.Count == 1);
-            Assert.IsTrue(games[0].Scoring == "3-1");
+            Assert.IsTrue(games[0].HomeScore == 3);
+            Assert.IsTrue(games[0].AwayScore == 1);
         }
 
         [Test]
@@ -127,7 +127,8 @@ namespace WorldCupGamesScoreBoardTests
 
             var games = manager.GetSummary();
             Assert.IsTrue(games.Count == 1);
-            Assert.IsTrue(games[0].Scoring == "4-6");
+            Assert.IsTrue(games[0].HomeScore == 4);
+            Assert.IsTrue(games[0].AwayScore == 6);
         }
 
         [Test]
@@ -170,6 +171,57 @@ namespace WorldCupGamesScoreBoardTests
             Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-CanadaXXX", 0, 9));
         }
 
-        #endregion 
+        #endregion
+
+        #region GetSummaryGames
+
+        [Test]
+        public void GetSummary()
+        {
+            manager.StartGame("Mexico", "Canada");
+            manager.StartGame("Spain", "Brazil");
+            manager.StartGame("Germany", "France");
+            
+            var games = manager.GetSummary();
+
+            Assert.IsTrue(games.Count == 3);
+            Assert.NotNull(games.Find(p => p.HomeTeam == "Mexico" && p.AwayTeam == "Canada"));
+            Assert.NotNull(games.Find(p => p.HomeTeam == "Spain" && p.AwayTeam == "Brazil"));
+            Assert.NotNull(games.Find(p => p.HomeTeam == "Germany" && p.AwayTeam == "France"));
+        }
+
+        [Test]
+        public void GetSummaryWithCorrectOrder()
+        {
+            manager.StartGame("Mexico", "Canada");
+            manager.StartGame("Spain", "Brazil");
+            manager.StartGame("Germany", "France");
+            manager.StartGame("Uruguay", "Italy");
+            manager.StartGame("Argentina", "Australia");
+
+            manager.UpdateGame("Mexico-Canada", "0-5");
+            manager.UpdateGame("Spain-Brazil", "10-2");
+            manager.UpdateGame("Germany-France", "2-2");
+            manager.UpdateGame("Uruguay-Italy", "6-6");
+            manager.UpdateGame("Argentina-Australia", "3-1");
+
+            var games = manager.GetSummary();
+
+            Assert.IsTrue(games.Count == 5);
+
+            Assert.IsTrue(games[0].HomeTeam == "Uruguay");
+            Assert.IsTrue(games[1].HomeTeam == "Spain");
+            Assert.IsTrue(games[2].HomeTeam == "Mexico");
+            Assert.IsTrue(games[3].HomeTeam == "Argentina");
+            Assert.IsTrue(games[4].HomeTeam == "Germany");
+
+            foreach (var item in games)
+            {
+                Console.WriteLine($"{item.HomeTeam} {item.HomeScore} - {item.AwayTeam} {item.AwayScore}");
+            };
+        }
+
+        #endregion
+
     }
 }

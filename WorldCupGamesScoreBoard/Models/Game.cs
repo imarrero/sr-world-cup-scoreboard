@@ -6,7 +6,10 @@ namespace WorldCupGamesScoreBoard.Models
     {
         public Guid Id { get; set; }                // internal
         public String MatchName { get; set; }       // Unique Name / key of the game
-        public String Scoring { get; set; }         // Scoring label
+        public string HomeTeam { get; set; }
+        public string AwayTeam { get; set; }
+        public int HomeScore { get; set; }
+        public int AwayScore { get; set; }
         public DateTime StartDate { get; set; }
-    }  
+    }
 }

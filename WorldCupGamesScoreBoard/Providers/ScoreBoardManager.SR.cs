@@ -22,9 +22,12 @@ namespace WorldCupGamesScoreBoard.Providers
 
             var game = new Game()
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 MatchName = parsedMatchName,
-                Scoring = "0-0",
+                HomeTeam = HomeTeamName,
+                AwayTeam = AwayTeamName,
+                HomeScore = 0,
+                AwayScore = 0,
                 StartDate = DateTime.Now.ToUniversalTime()
             };
 
@@ -59,14 +62,19 @@ namespace WorldCupGamesScoreBoard.Providers
 
             RunUpdateGameValidations(parsedMatchName, HomeScore, AwayScore);
 
-            _currentGames[parsedMatchName].Scoring = $"{HomeScore}-{AwayScore}";
+            _currentGames[parsedMatchName].HomeScore = HomeScore;
+            _currentGames[parsedMatchName].AwayScore = AwayScore;
 
             return new Game();
         }
 
         public List<Game> GetSummary()
         {
-            return _currentGames.Values.ToList();
+            var results = _currentGames.Values
+                                       .OrderByDescending(p => (p.HomeScore + p.AwayScore))
+                                       .ThenByDescending(p => p.StartDate);
+
+            return results.ToList();
         }
 
         #region region private functions
