@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using WorldCupGamesScoreBoard.Models;
-
 
 namespace WorldCupGamesScoreBoard.Providers
 {

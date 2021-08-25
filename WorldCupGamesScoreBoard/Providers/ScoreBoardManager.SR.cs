@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using WorldCupGamesScoreBoard.Models;
@@ -7,11 +8,11 @@ namespace WorldCupGamesScoreBoard.Providers
 {
     public class ScoreBoardManagerSR : IScoreBoardManager
     {
-        private Dictionary<string, Game> _currentGames { get; set; }
+        private ConcurrentDictionary<string, Game> _currentGames { get; set; }
 
         public ScoreBoardManagerSR()
         {
-            _currentGames = new Dictionary<string, Game>();
+            _currentGames = new ConcurrentDictionary<string, Game>();
         }
 
         public Game StartGame(string HomeTeamName, string AwayTeamName)
@@ -31,19 +32,17 @@ namespace WorldCupGamesScoreBoard.Providers
                 StartDate = DateTime.Now.ToUniversalTime()
             };
 
-            _currentGames.Add(parsedMatchName, game);
+            _currentGames.TryAdd(parsedMatchName, game);
 
             return game;
         }
-
 
         public bool FinishGame(string MatchName)
         {
             var parsedMatchName = MatchName?.ToUpper();
 
             RunFinishGameValidations(parsedMatchName);
-
-            return _currentGames.Remove(parsedMatchName);
+            return _currentGames.TryRemove(parsedMatchName, out _);
         }
 
         public Game UpdateGame(string MatchName, string PairScore)
@@ -116,6 +115,14 @@ namespace WorldCupGamesScoreBoard.Providers
 
             if (_currentGames.ContainsKey(matchName))
                 throw new ArgumentException("ERROR CODE: XXX - Requested Game is already on going: Cannot be recreated");
+
+            // check same teams other matches!
+            if (_currentGames.Keys.FirstOrDefault(p => p.Contains(homeTeamName.ToUpper())) != null)
+                throw new ArgumentException("ERROR CODE: XXX - Requested Home Team is already on going in a match: Cannot be recreated");
+
+            if (_currentGames.Keys.FirstOrDefault(p => p.Contains(awayTeamName.ToUpper())) != null)
+                throw new ArgumentException("ERROR CODE: XXX - Requested Away Team is already on going in a match: Cannot be recreated");
+
         }
 
         private void RunFinishGameValidations(string matchName)

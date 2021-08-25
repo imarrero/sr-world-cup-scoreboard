@@ -1,6 +1,5 @@
 using NUnit.Framework;
 using System;
-using WorldCupGamesScoreBoard.Models;
 using WorldCupGamesScoreBoard.Providers;
 
 namespace WorldCupGamesScoreBoardTests
@@ -35,6 +34,17 @@ namespace WorldCupGamesScoreBoardTests
         {
             manager.StartGame("Germany", "France");
             Assert.Throws<ArgumentException>(() => manager.StartGame("Germany", "France"));
+        }
+
+        [Test]
+        public void UNSUCCESS_StartGames_TeamIsStillPlaying()
+        {
+            manager.StartGame("Mexico", "Canada");
+            manager.StartGame("Spain", "Brazil");
+            manager.StartGame("Germany", "France");
+
+            Assert.Throws<ArgumentException>(() => manager.StartGame("Another", "Spain"));
+            Assert.Throws<ArgumentException>(() => manager.StartGame("Spain", "Another"));
         }
 
         [Test]
@@ -222,6 +232,5 @@ namespace WorldCupGamesScoreBoardTests
         }
 
         #endregion
-
     }
 }
