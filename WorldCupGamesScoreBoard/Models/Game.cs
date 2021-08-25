@@ -2,6 +2,9 @@
 
 namespace WorldCupGamesScoreBoard.Models
 {
+    /// <summary>
+    /// FOOTBALL WORLD CUP MANAGER GAME MODEL
+    /// </summary>
     public class Game
     {
         public Guid Id { get; set; }                

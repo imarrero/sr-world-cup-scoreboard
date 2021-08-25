@@ -3,6 +3,10 @@ using WorldCupGamesScoreBoard.Models;
 
 namespace WorldCupGamesScoreBoard.Providers
 {
+    /// <summary>
+    /// Interface for all games that support:
+    /// - Two teams + scoring as integer numbers
+    /// </summary>
     public interface IScoreBoardManager
     {
         /// <summary>

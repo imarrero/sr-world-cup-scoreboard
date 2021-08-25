@@ -6,6 +6,9 @@ using WorldCupGamesScoreBoard.Models;
 
 namespace WorldCupGamesScoreBoard.Providers
 {
+    /// <summary>
+    /// FOOTBALL WORLD CUP MANAGER
+    /// </summary>
     public class ScoreBoardManagerSR : IScoreBoardManager
     {
         private ConcurrentDictionary<string, Game> _currentGames { get; set; }
