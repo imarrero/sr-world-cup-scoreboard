@@ -15,8 +15,9 @@ Detailed information is provided by PDF document
 
 ## How to run the project
 1. Clone repository
-2. In the IDE set as startup WorldCupGamesScoreBoardTests unit test project
-3. Run all tests, debug if required.
+2. Open sr-world-cup-scoreboard.sln
+3. In the IDE set as startup WorldCupGamesScoreBoardTests unit test project
+4. Run all tests, debug if required.
 
 ## Project management
 
