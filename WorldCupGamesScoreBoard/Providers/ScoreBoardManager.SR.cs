@@ -16,7 +16,7 @@ namespace WorldCupGamesScoreBoard.Providers
 
         public Game StartGame(string HomeTeamName, string AwayTeamName)
         {
-            var matchName = $"{HomeTeamName.Trim()}-{AwayTeamName.Trim()}".ToUpper();
+            var matchName = $"{HomeTeamName?.Trim()}-{AwayTeamName?.Trim()}".ToUpper();
 
             RunStartGameValidations(HomeTeamName, AwayTeamName, matchName);
 
@@ -36,7 +36,11 @@ namespace WorldCupGamesScoreBoard.Providers
 
         public bool FinishGame(string MatchName)
         {
-            return true;
+            var matchName = MatchName?.ToUpper();
+
+            RunFinishGameValidations(matchName);
+
+            return _currentGames.Remove(matchName);
         }
 
         public Game UpdateGame(string MatchName, string PairScore)
@@ -59,14 +63,24 @@ namespace WorldCupGamesScoreBoard.Providers
         private void RunStartGameValidations(string HomeTeamName, string AwayTeamName, string matchName)
         {
             // TODO TECH DEBT: Move this to FluentValidation Library or similar centralized validations
-            if (_currentGames.ContainsKey(matchName))
-                throw new ArgumentException("Requested Game is already on going: Cannot be recreeated");
-
             if (string.IsNullOrWhiteSpace(HomeTeamName))
-                throw new ArgumentException("Requested HomeTeamName is not valid name");
+                throw new ArgumentException("ERROR CODE: XXX - Requested HomeTeamName is not valid name");
 
             if (string.IsNullOrWhiteSpace(AwayTeamName))
-                throw new ArgumentException("Requested HomeTeamName is not valid name");
+                throw new ArgumentException("ERROR CODE: XXX - Requested HomeTeamName is not valid name");
+
+            if (_currentGames.ContainsKey(matchName))
+                throw new ArgumentException("ERROR CODE: XXX - Requested Game is already on going: Cannot be recreated");
+        }
+
+        private void RunFinishGameValidations(string matchName)
+        {
+            // TODO TECH DEBT: Move this to FluentValidation Library or similar centralized validations
+            if (string.IsNullOrWhiteSpace(matchName))
+                throw new ArgumentException("ERROR CODE: XXX - Requested MatchName is not valid");
+
+            if (!_currentGames.ContainsKey(matchName))
+                throw new ArgumentException("ERROR CODE: XXX - Requested Game was not found in current ongoing matches: Cannot be Finished");
         }
 
         #endregion
