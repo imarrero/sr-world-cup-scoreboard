@@ -1,9 +1,9 @@
 # sr-world-cup-scoreboard
-Sport Radar code challenge - imarrero
+SR code challenge - imarrero
 
 ## Goals
 
-Create a library to manage in memory Football World Cup matches data
+Create a c# library to manage in memory Football World Cup matches data
 
 Some actions must be implemented:
 1. Start a game. Our data partners will send us data for the games when they start, and these should capture (Initial score is 0 – 0).
@@ -16,8 +16,10 @@ Detailed information is provided by PDF document
 ## How to run the project
 1. Clone repository
 2. Open sr-world-cup-scoreboard.sln
-3. In the IDE set as startup WorldCupGamesScoreBoardTests unit test project
-4. Run all tests, debug if required.
+3. Build Solution
+4. Execute Units tests: [More Info about Unit Tests](WorldCupGamesScoreBoardTests/_Readme.md)
+6. Execute BDD tests: [More Info about Behaviour tests](WorldCupGamesScoreBoard.BDD.Tests/_Readme.md)
+8. Run all tests, debug if required.
 
 ## Project management
 
@@ -35,14 +37,33 @@ This way, on each "release date" a new release branch can be create with all dev
 
 ## Future improvements
 
-1. Set parameters validation in a centralized class / Use a library like FluentValidation where possible
-3. Persist data, currently is in memory
-4. Implement Logging:
+1. Infrastructure: Separate external parameters from internal use:
+* Create a Facade/API/Gateway
+* Set parameters validation in a centralized class (FluentValidation / DaataAnnotations.. )
+* Use a model as a entry parameter
+
+2.- Create performance tests
+* Evaluate current Concurrent dictionary vs Performance (maybe using _locks in the critical methods is enough) 
+* Make actions Async to really use Concurrent dictionary features
+* * - No different consumers should touch the same MATCH at the same time: Evaluate
+
+3. Persist data
+
+4. Security
+* Sanity text parameters
+* Configuration for max dictionary items ( to avoid overflow of matches )
+
+5. Implement Logging:
  - System logs 
  - Business data logs: Each CRUD operation should be saved, in order to get a complete trace of what happened in each match. 
- - Send to Elastic, for example.
-5. Create a WebAPI / Microservice to consume this assembly (library) to share data on the internet
-6. Create an API gateway to separate public endpoints from internal endpoints
-7. Containerize and deploy on an orchestrator
-8. Monitorize Logs with Kibana, scale pods as necessary, communicate with other ms in the cluster/cloud using rabbit/kafka.
-Many things.. depending of requisites, could be a *never finished work*.
+ - Send to Elastic or similar
+ - Create a Kibana or similar monitoring website: CONNECT TO SLACK or similar!! 
+
+5. Create a WebAPI / Microservice to consume this library
+* * User Swagger for documentation / secure access
+* * Improve Error handling: Error codes centralized + Friendly Descriptions + Language resolution according request
+* * * (Bonus) Create an API gateway to separate public endpoints from internal endpoints
+* * * (Bonus) Containerize and deploy on an orchestrator
+* * * (Bonus) Monitorize Logs with Kibana, scale pods as necessary, communicate events with other microservices in the cluster/cloud using rabbit/kafka.
+
+Sorry for the overthinking. Just brainstorming surely Im missing important things
