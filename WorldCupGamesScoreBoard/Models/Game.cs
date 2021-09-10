@@ -7,6 +7,10 @@ namespace WorldCupGamesScoreBoard.Models
     /// </summary>
     public class Game
     {
+        public Game()
+        {
+            Id = Guid.NewGuid();
+        }
         public Guid Id { get; set; }                
         public string MatchName { get; set; }       // Unique Name / key of the game
         public string HomeTeam { get; set; }

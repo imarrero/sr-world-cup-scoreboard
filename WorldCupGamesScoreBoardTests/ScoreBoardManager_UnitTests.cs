@@ -1,22 +1,35 @@
-using NUnit.Framework;
+using Moq;
 using System;
+using WorldCupGamesScoreBoard.Models;
 using WorldCupGamesScoreBoard.Providers;
+using Xunit;
 
-namespace WorldCupGamesScoreBoardTests
+namespace WorldCupGamesScoreBoard.Unit.Tests
 {
-    public class Tests
+    /// <summary>
+    /// Unit tests against WorldCupGamesScoreBoard Library
+    /// </summary>
+    public class ScoreBoardManager_UnitTests
     {
-        private IScoreBoardManager manager;
+        private Mock<IScoreBoardManager> _mockManager = new Mock<IScoreBoardManager>();
+        private IScoreBoardManager manager = new ScoreBoardManagerSR();
 
-        [SetUp]
-        public void Setup()
+        private readonly string _homeTeamDefault;
+        private readonly string _awayTeamDefault;
+        private readonly string _matchKeyDefault;
+
+        public ScoreBoardManager_UnitTests()
         {
             manager = new ScoreBoardManagerSR();
+
+            _homeTeamDefault = "Spain";
+            _awayTeamDefault = "Canada";
+            _matchKeyDefault = $"{_homeTeamDefault}-{_awayTeamDefault}";
         }
 
         #region StartGames
 
-        [Test]
+        [Fact]
         public void StartFiveGames()
         {
             manager.StartGame("Mexico", "Canada");
@@ -26,17 +39,44 @@ namespace WorldCupGamesScoreBoardTests
             manager.StartGame("Argentina", "Australia");
 
             var games = manager.GetSummary();
-            Assert.IsTrue(games.Count == 5);
+            Assert.Equal(5, games.Count);
         }
 
-        [Test]
+        [Fact]
+        public void StartGameMockingTheManager()
+        {
+            // Real test: Inject _mockManager into the library API / Facade
+
+            // MOCK
+            _mockManager.Setup(p => p.StartGame(_homeTeamDefault, _awayTeamDefault))
+                        .Returns(new Game()
+                        {
+                            HomeTeam = _homeTeamDefault,
+                            AwayTeam = _awayTeamDefault,
+                            HomeScore = 0,
+                            AwayScore = 0,
+                            MatchName = _matchKeyDefault,
+                            StartDate = DateTime.Now
+                        });
+            // Act
+            var game = _mockManager.Object.StartGame(_homeTeamDefault, _awayTeamDefault);
+
+            // Assert
+            Assert.NotNull(game);
+            Assert.Equal(_homeTeamDefault, game.HomeTeam);
+            Assert.Equal(_awayTeamDefault, game.AwayTeam);
+            Assert.Equal(_matchKeyDefault, game.MatchName);
+
+        }
+
+        [Fact]
         public void UNSUCCESS_StartGames_DuplicatedMatch()
         {
             manager.StartGame("Germany", "France");
             Assert.Throws<ArgumentException>(() => manager.StartGame("Germany", "France"));
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_StartGames_TeamIsStillPlaying()
         {
             manager.StartGame("Mexico", "Canada");
@@ -47,25 +87,25 @@ namespace WorldCupGamesScoreBoardTests
             Assert.Throws<ArgumentException>(() => manager.StartGame("Spain", "Another"));
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_StartGames_EmptyHomeTeam()
         {
             Assert.Throws<ArgumentException>(() => manager.StartGame("", "Brazil"));
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_StartGames_EmptyAwayTeam()
         {
             Assert.Throws<ArgumentException>(() => manager.StartGame("Spain", ""));
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_StartGames_NullHomeTeam()
         {
             Assert.Throws<ArgumentException>(() => manager.StartGame(null, "Brazil"));
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_StartGames_nullAwayTeam()
         {
             Assert.Throws<ArgumentException>(() => manager.StartGame("Spain", null));
@@ -75,7 +115,7 @@ namespace WorldCupGamesScoreBoardTests
 
         #region FinishGames
 
-        [Test]
+        [Fact]
         public void FinishFiveGames()
         {
             manager.StartGame("Mexico", "Canada");
@@ -84,30 +124,30 @@ namespace WorldCupGamesScoreBoardTests
             manager.StartGame("Uruguay", "Italy");
             manager.StartGame("Argentina", "Australia");
 
-            Assert.IsTrue(manager.FinishGame("Spain-Brazil"));
-            Assert.IsTrue(manager.FinishGame("Mexico-Canada"));
-            Assert.IsTrue(manager.FinishGame("Uruguay-Italy"));
-            Assert.IsTrue(manager.FinishGame("Germany-France"));
-            Assert.IsTrue(manager.FinishGame("Argentina-Australia"));
+            Assert.True(manager.FinishGame("Spain-Brazil"));
+            Assert.True(manager.FinishGame("Mexico-Canada"));
+            Assert.True(manager.FinishGame("Uruguay-Italy"));
+            Assert.True(manager.FinishGame("Germany-France"));
+            Assert.True(manager.FinishGame("Argentina-Australia"));
 
             var games = manager.GetSummary();
 
-            Assert.IsTrue(games.Count == 0);
+            Assert.True(games.Count == 0);
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_FinishGames_NotExistsMatchName()
         {
             Assert.Throws<ArgumentException>(() => manager.FinishGame("Spain-DUMMY"));
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_FinishGames_EmptyMatchName()
         {
             Assert.Throws<ArgumentException>(() => manager.FinishGame(""));
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_FinishGames_NullMatchName()
         {
             Assert.Throws<ArgumentException>(() => manager.FinishGame(null));
@@ -117,38 +157,38 @@ namespace WorldCupGamesScoreBoardTests
 
         #region UpdateGames
 
-        [Test]
+        [Fact]
         public void UpdateGame_Overload1()
         {
             manager.StartGame("Mexico", "Canada");
             manager.UpdateGame("Mexico-Canada", "3-1");
 
             var games = manager.GetSummary();
-            Assert.IsTrue(games.Count == 1);
-            Assert.IsTrue(games[0].HomeScore == 3);
-            Assert.IsTrue(games[0].AwayScore == 1);
+            Assert.True(games.Count == 1);
+            Assert.True(games[0].HomeScore == 3);
+            Assert.True(games[0].AwayScore == 1);
         }
 
-        [Test]
+        [Fact]
         public void UpdateGame_Overload2()
         {
             manager.StartGame("Mexico", "Canada");
             manager.UpdateGame("Mexico-Canada", 4, 6);
 
             var games = manager.GetSummary();
-            Assert.IsTrue(games.Count == 1);
-            Assert.IsTrue(games[0].HomeScore == 4);
-            Assert.IsTrue(games[0].AwayScore == 6);
+            Assert.True(games.Count == 1);
+            Assert.True(games[0].HomeScore == 4);
+            Assert.True(games[0].AwayScore == 6);
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_UpdateGame_EmptyScoringV1()
         {
             manager.StartGame("Mexico", "Canada");
             Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-Canada", ""));
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_UpdateGame_IncorrectScoringValuesV1()
         {
             manager.StartGame("Mexico", "Canada");
@@ -158,14 +198,14 @@ namespace WorldCupGamesScoreBoardTests
             Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-Canada", "-b-ad-"));
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_UpdateGame_NotExistsMatchNameV1()
         {
             manager.StartGame("Mexico", "Canada");
             Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-CanadaXXX", "0-9"));
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_UpdateGame_IncorrectScoringValuesV2()
         {
             manager.StartGame("Mexico", "Canada");
@@ -174,7 +214,7 @@ namespace WorldCupGamesScoreBoardTests
             Assert.Throws<ArgumentException>(() => manager.UpdateGame("Mexico-Canada", 10, -10));
         }
 
-        [Test]
+        [Fact]
         public void UNSUCCESS_UpdateGame_NotExistsMatchNameV2()
         {
             manager.StartGame("Mexico", "Canada");
@@ -185,22 +225,22 @@ namespace WorldCupGamesScoreBoardTests
 
         #region GetSummaryGames
 
-        [Test]
+        [Fact]
         public void GetSummary()
         {
             manager.StartGame("Mexico", "Canada");
             manager.StartGame("Spain", "Brazil");
             manager.StartGame("Germany", "France");
-            
+
             var games = manager.GetSummary();
 
-            Assert.IsTrue(games.Count == 3);
+            Assert.True(games.Count == 3);
             Assert.NotNull(games.Find(p => p.HomeTeam == "Mexico" && p.AwayTeam == "Canada"));
             Assert.NotNull(games.Find(p => p.HomeTeam == "Spain" && p.AwayTeam == "Brazil"));
             Assert.NotNull(games.Find(p => p.HomeTeam == "Germany" && p.AwayTeam == "France"));
         }
 
-        [Test]
+        [Fact]
         public void GetSummaryWithCorrectOrder()
         {
             manager.StartGame("Mexico", "Canada");
@@ -217,13 +257,13 @@ namespace WorldCupGamesScoreBoardTests
 
             var games = manager.GetSummary();
 
-            Assert.IsTrue(games.Count == 5);
+            Assert.True(games.Count == 5);
 
-            Assert.IsTrue(games[0].HomeTeam == "Uruguay");
-            Assert.IsTrue(games[1].HomeTeam == "Spain");
-            Assert.IsTrue(games[2].HomeTeam == "Mexico");
-            Assert.IsTrue(games[3].HomeTeam == "Argentina");
-            Assert.IsTrue(games[4].HomeTeam == "Germany");
+            Assert.True(games[0].HomeTeam == "Uruguay");
+            Assert.True(games[1].HomeTeam == "Spain");
+            Assert.True(games[2].HomeTeam == "Mexico");
+            Assert.True(games[3].HomeTeam == "Argentina");
+            Assert.True(games[4].HomeTeam == "Germany");
 
             foreach (var item in games)
             {

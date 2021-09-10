@@ -47,5 +47,4 @@ namespace WorldCupGamesScoreBoard.Providers
         /// <returns></returns>
         List<Game> GetSummary();
     }
-
 }

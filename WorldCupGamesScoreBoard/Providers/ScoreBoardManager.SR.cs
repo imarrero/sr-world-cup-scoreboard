@@ -45,6 +45,7 @@ namespace WorldCupGamesScoreBoard.Providers
             var parsedMatchName = MatchName?.ToUpper();
 
             RunFinishGameValidations(parsedMatchName);
+
             return _currentGames.TryRemove(parsedMatchName, out _);
         }
 
@@ -67,7 +68,7 @@ namespace WorldCupGamesScoreBoard.Providers
             _currentGames[parsedMatchName].HomeScore = HomeScore;
             _currentGames[parsedMatchName].AwayScore = AwayScore;
 
-            return new Game();
+            return _currentGames[parsedMatchName];
         }
 
         public List<Game> GetSummary()
@@ -119,11 +120,11 @@ namespace WorldCupGamesScoreBoard.Providers
             if (_currentGames.ContainsKey(matchName))
                 throw new ArgumentException("ERROR CODE: XXX - Requested Game is already on going: Cannot be recreated");
 
-            // check same teams other matches!
-            if (_currentGames.Keys.FirstOrDefault(p => p.Contains(homeTeamName.ToUpper())) != null)
+            // check same teams playing in other matches!
+            if (_currentGames.Keys.FirstOrDefault(p => p.Contains(homeTeamName, StringComparison.InvariantCultureIgnoreCase)) != null)
                 throw new ArgumentException("ERROR CODE: XXX - Requested Home Team is already on going in a match: Cannot be recreated");
 
-            if (_currentGames.Keys.FirstOrDefault(p => p.Contains(awayTeamName.ToUpper())) != null)
+            if (_currentGames.Keys.FirstOrDefault(p => p.Contains(awayTeamName, StringComparison.InvariantCultureIgnoreCase)) != null)
                 throw new ArgumentException("ERROR CODE: XXX - Requested Away Team is already on going in a match: Cannot be recreated");
 
         }
