@@ -15,8 +15,9 @@ Detailed information is provided by PDF document
 
 ## How to run the project
 1. Clone repository
-2. In the IDE set as startup WorldCupGamesScoreBoardTests unit test project
-3. Run all tests, debug if required.
+2. Open sr-world-cup-scoreboard.sln
+3. In the IDE set as startup WorldCupGamesScoreBoardTests unit test project
+4. Run all tests, debug if required.
 
 ## Project management
 
@@ -27,7 +28,7 @@ Tickets created in Trello:
 
 * As this is a test, all commits are in main branch. The correct way to go in a production environment should be more like:
 * * Create a *development* and *release* branch
-* * Dode each ticket on a *feature* branch (from dev)
+* * Code each ticket on a *feature* branch (from dev)
 * * After local tests passed -> create a pull request to merge in *development*
 * * If team CR approves the PR, then will be merged into *development*
 This way, on each "release date" a new release branch can be create with all dev code. Then, depending on the company policy, (new test are done / staging etc..) finally release is merged into *MASTER* or *MAIN* and deployed to production.
